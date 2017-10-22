@@ -4,6 +4,7 @@ namespace Dykyi\Models;
 
 use PDO;
 use Dykyi\Component\Coordinates;
+use Dykyi\Helpers\GPSConvertor;
 
 /**
  * Class POIs
@@ -18,10 +19,14 @@ class POIs extends BaseModel
 
     /**
      * @param Coordinates $coordinates
+     * @param $meters
      * @return array|string
      */
-    public function getPOIsByCoordinates(Coordinates $coordinates)
+    public static function getPOIsByCoordinates(Coordinates $coordinates, $meters)
     {
+        $pair_lot = GPSConvertor::addMetersToDegreeInLongitude($coordinates->getLon(), 1000);
+        $pair_lat = GPSConvertor::addMetersToDegreeInLatitude($coordinates->getLat(), $meters);
+
         $sqlExample = 'SELECT title FROM pois';
         $stm = self::$db->prepare($sqlExample);
         $stm->execute();
