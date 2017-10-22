@@ -1,0 +1,10 @@
+{
+    "name": "SearchPOIs",
+    "license": "proprietary",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Dykyi\\": ["src/","api/"]
+        }
+    }
+}
