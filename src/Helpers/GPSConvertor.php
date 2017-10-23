@@ -2,6 +2,8 @@
 
 namespace Dykyi\Helpers;
 
+use Dykyi\Component\Coordinates;
+
 /**
  * url: https://v-ipc.ru/guides/coord
  *
@@ -14,63 +16,59 @@ class GPSConvertor
     const LATITUDE  = 40075.696;
 
     /**
-     * @return float
-     */
-    private static function getLongitudeMeterInSec()
-    {
-        return round(self::LONGITUDE / 360 / 60 / 60, 3);
-    }
-
-    /**
-     * @param $degree
-     * @return float
-     */
-    private static function getLatitudeMeterInSec($degree)
-    {
-        return round((cos($degree) * (self::LATITUDE / 360)) / 60 / 60, 3);
-    }
-
-    /**
-     * Longitude - it is simple
-     *
-     * @param $meters
+     * @param Coordinates $coord1
+     * @param Coordinates $coord2
      * @return int
      */
-    public static function metersToSecondsLongitude($meters = 1000)
+    public static function getDistance(Coordinates $coord1, Coordinates $coord2 ) {
+        $earth_radius = 6371;
+
+        $dLat = deg2rad( $coord2->getLat() - $coord1->getLat() );
+        $dLon = deg2rad( $coord2->getLon() - $coord1->getLon() );
+
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($coord1->getLat())) * cos(deg2rad($coord2->getLat())) * sin($dLon/2) * sin($dLon/2);
+        $c = 2 * asin(sqrt($a));
+        return $earth_radius * $c;
+    }
+
+
+    /**
+     * @param $dec
+     * @return array
+     */
+    public static function DECtoDMS($dec)
     {
-        return round($meters / (self::getLongitudeMeterInSec() * 1000));
+
+        // Converts decimal longitude / latitude to DMS
+        // ( Degrees / minutes / seconds )
+
+        // This is the piece of code which may appear to
+        // be inefficient, but to avoid issues with floating
+        // point math we extract the integer part and the float
+        // part by using a string function.
+
+        $vars = explode(".",$dec);
+        $deg = $vars[0];
+        $tempma = "0.".$vars[1];
+
+        $tempma = $tempma * 3600;
+        $min = floor($tempma / 60);
+        $sec = $tempma - ($min*60);
+
+        return array("deg"=>$deg,"min"=>$min,"sec"=>$sec);
     }
 
     /**
-     * @param $degree
-     * @param $meters
+     * @param $deg
+     * @param $min
+     * @param $sec
      * @return int
      */
-    private static function metersToSecondsLatitude($degree, $meters)
+    public static function DMStoDEC($deg,$min,$sec)
     {
-        return round( $meters / (self::getLatitudeMeterInSec($degree) * 1000));
-    }
-
-    /**
-     * @param $degree
-     * @param int $meters
-     * @return array
-     */
-    public static function addMetersToDegreeInLatitude($degree, $meters = 1000)
-    {
-        $position = self::metersToSecondsLatitude($degree, $meters) * 0.0001;
-        return [$degree + $position, $degree - $position];
-    }
-
-    /**
-     * @param $degree
-     * @param int $meters
-     * @return array
-     */
-    public static function addMetersToDegreeInLongitude($degree, $meters = 1000)
-    {
-        $position = self::metersToSecondsLongitude($meters) * 0.0001;
-        return [$degree + $position, $degree - $position];
+        // Converts DMS ( Degrees / minutes / seconds )
+        // to decimal format longitude / latitude
+        return $deg+((($min*60)+($sec))/3600);
     }
 
 

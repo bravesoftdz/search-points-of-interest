@@ -17,20 +17,15 @@ class POIs extends BaseModel
 {
     const ERROR_INPUT_HOTEL_NAME = 'Please enter the hotel name!';
 
-    /**
-     * @param Coordinates $coordinates
-     * @param $meters
+    /**]
      * @return array|string
      */
-    public static function getPOIsByCoordinates(Coordinates $coordinates, $meters)
+    public function getPOIsByCoordinates()
     {
-        $pair_lot = GPSConvertor::addMetersToDegreeInLongitude($coordinates->getLon(), 1000);
-        $pair_lat = GPSConvertor::addMetersToDegreeInLatitude($coordinates->getLat(), $meters);
-
-        $sqlExample = 'SELECT title FROM pois';
+        $sqlExample = 'SELECT * FROM pois WHERE (lat IS NOT NULL) AND (lon IS NOT NULL)';
         $stm = self::$db->prepare($sqlExample);
         $stm->execute();
-        $data = $stm->fetchAll(PDO::FETCH_COLUMN);
+        $data = $stm->fetchAll(PDO::FETCH_OBJ);
 
         return $data ? $data : '';
     }

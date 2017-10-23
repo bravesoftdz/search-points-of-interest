@@ -3,9 +3,7 @@
 namespace Dykyi;
 
 use Dykyi\Component\Coordinates;
-use Dykyi\Helpers\GPSConvertor;
 use Dykyi\Models\Hotels;
-use Dykyi\Models\POIs;
 
 /**
  * Class Application
@@ -13,6 +11,31 @@ use Dykyi\Models\POIs;
  */
 class Application
 {
+
+    const RADIUS = 1;
+
+    /**
+     * @param $hotelName
+     * @param array $pois
+     * @return string
+     */
+    private function printInfo($hotelName, array $pois)
+    {
+        $text = sprintf('The "%s" has %s POIs in a %dkm radius and POIs are:', $hotelName, count($pois), self::RADIUS). '<br>';
+        foreach ($pois as $i => $one){
+            $text .= sprintf('%d) %s (description: %s, address: %s, lat: %s, lon: %s)',
+                    $i+1,
+                    $one->title,
+                    '[empty]',
+                    is_null($one->address) ? '' : $one->address,
+                    is_null($one->lat) ?: $one->lat,
+                    is_null($one->lon) ?: $one->lon
+                    ) .'<br>';
+        }
+        return $text;
+    }
+
+
     /**
      * Start function
      *
@@ -20,14 +43,20 @@ class Application
      */
     public function run($url)
     {
-        $hotel = new Hotels();
         /** @var Coordinates $coord */
-        $coord = $hotel->getHotelCoordinatesByName('The Grosvenor Hotel');
-        $dd = (new POIs())->getPOIsByCoordinates($coord);
-        $rr = GPSConvertor::addMetersToDegreeInLongitude($coord->getLon(),1000);
-//        var_dump($rr); die();
-
         $hotel = (new Hotels())->getRandomHotelName();
-        echo Api::connect($url, json_encode(['data' => ['hotel' => $hotel]]));
+        $jsonPOIlist = Api::connect($url, json_encode([
+            'data' => [
+                'hotel'     => $hotel,
+                'kilometer' => self::RADIUS,
+            ],
+        ]));
+        $poiList = json_decode($jsonPOIlist);
+        if (count($poiList) <= 0)
+        {
+            exit(Hotels::ERROR_NOT_POIS_FOUND);
+        }
+
+        echo $this->printInfo($hotel, $poiList);
     }
 }
