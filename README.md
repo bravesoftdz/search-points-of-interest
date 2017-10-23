@@ -12,6 +12,7 @@ The function should return the following, for example: "the Royal Horseguards ho
 ## Install
 
 + composer install && composer dumpautoload -o
++ install database/*.sql scripts
 + set URL path in file index.php
  
 ## Usage
