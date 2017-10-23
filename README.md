@@ -7,7 +7,7 @@ There are two data tables - 1. hotels and 2. POIs (points of interest). The func
 
 The function should return the following, for example: "the Royal Horseguards hotel” has 3 POIs in a 1km radius and POIs are: Big Ben (description, address, lat long), Carnaby Street (description, address, lat long), Eye of London (description, address, lat long).
 
-![image](https://github.com/dykyi-roman/search-points-of-interest/images/image.jpg)
+![image](https://github.com/dykyi-roman/search-points-of-interest/blob/master/images/image.jpg)
 
 ## Install
 
