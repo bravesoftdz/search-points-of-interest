@@ -16,6 +16,8 @@ class GPSConvertor
     const LATITUDE  = 40075.696;
 
     /**
+     * TODO: For large data, it's better to move the implementation inside SQL query
+     * 
      * @param Coordinates $coord1
      * @param Coordinates $coord2
      * @return int
