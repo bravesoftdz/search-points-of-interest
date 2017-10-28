@@ -4,6 +4,10 @@ error_reporting( E_ERROR );
 
 define ('VERSION_MIGRATE','1.0');
 
+// TODO: order script when run migration
+// TODO: display info about after finish script (2 table install, 1db - create...)
+// TODO: display text with color
+
 /**
  * Class TextBuilder
  */
