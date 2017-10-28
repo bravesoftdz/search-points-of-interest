@@ -1,8 +1,8 @@
 <?php
-session_start();
 
 error_reporting( E_ERROR );
-extension_loaded ('PDO' );
+
+define ('VERSION_MIGRATE','1.0');
 
 /**
  * Class TextBuilder
@@ -42,8 +42,6 @@ class TextBuilder
  */
 class Migrate
 {
-    const version = '1.0';
-
     const FILE_NAME = '.env';
 
     const DB_HOST = 'DYKYI_MIGRATE_HOST';
@@ -55,6 +53,8 @@ class Migrate
      * @var TextBuilder $t
      */
     private $t;
+
+    private $inputData = [];
 
     public function __construct()
     {
@@ -80,7 +80,9 @@ class Migrate
             ->add("**************************************************")->add('')
 
             ->add('Usage:')->add("command [options]", 2)->add('')
-            ->add('Options:')->add("-a           - Run all", 2)->add('')
+            ->add('Options:')
+                ->add("-a           - Run all", 2)
+                ->add("-v           - Display this application version", 2)->add('')
 
             ->add('Available commands:')
                 ->add("connect      - Connect to DB", 2)
@@ -97,12 +99,12 @@ class Migrate
      */
     private function commandConnect()
     {
-        $this->sessionInput("Input DB host: ",     self::DB_HOST);
-        $this->sessionInput("Input DB name: ",     self::DB_NAME);
-        $this->sessionInput("Input DB user: ",     self::DB_USER);
-        $this->sessionInput("Input DB password: ", self::DB_PASS);
+        $this->InputData("Input DB host: ",     self::DB_HOST);
+        $this->InputData("Input DB name: ",     self::DB_NAME);
+        $this->InputData("Input DB user: ",     self::DB_USER);
+        $this->InputData("Input DB password: ", self::DB_PASS);
 
-        $this->configSave();
+        $this->saveInputData(self::FILE_NAME);
 
         return $this->t->add('Done')->get();
     }
@@ -113,6 +115,10 @@ class Migrate
      */
     private function commandMigrate($option)
     {
+        if (!file_exists(self::FILE_NAME)){
+            return $this->t->add('Before run migration function you must run command - "connect"')->get();
+        }
+
         if ($option === '-a'){
             return $this->runAllMigrate();
         }
@@ -151,37 +157,41 @@ class Migrate
      */
     private function getVersion()
     {
-        return $this->t->add('Version: ' . self::version)->get();
+        return $this->t->add('Version: ' . VERSION_MIGRATE)->get();
     }
 
     /**
-     * @param string $text
-     * @param string $key
+     * @param $text
+     * @param $key
      */
-    private function sessionInput($text, $key)
+    private function inputData($text, $key)
     {
         echo $text;
         $handle = fopen ("php://stdin", "r");
         $line   = fgets($handle);
-        $_SESSION[$key] = $line;
+        $this->inputData[$key] = $line;
     }
 
-    private function configSave()
+    /**
+     * @param $fileName
+     */
+    private function saveInputData($fileName)
     {
-        $file = fopen(self::FILE_NAME, "w");
+        $file = fopen($fileName, "w");
         try {
-            fwrite($file, sprintf("%s=%s", self::DB_HOST, $_SESSION[self::DB_HOST]));
-            fwrite($file, sprintf("%s=%s", self::DB_NAME, $_SESSION[self::DB_NAME]));
-            fwrite($file, sprintf("%s=%s", self::DB_USER, $_SESSION[self::DB_USER]));
-            fwrite($file, sprintf("%s=%s", self::DB_PASS, $_SESSION[self::DB_PASS]));
+            fwrite($file, sprintf("%s=%s", self::DB_HOST, $this->inputData[self::DB_HOST]));
+            fwrite($file, sprintf("%s=%s", self::DB_NAME, $this->inputData[self::DB_NAME]));
+            fwrite($file, sprintf("%s=%s", self::DB_USER, $this->inputData[self::DB_USER]));
+            fwrite($file, sprintf("%s=%s", self::DB_PASS, $this->inputData[self::DB_PASS]));
         } finally {
             fclose($file);
         }
     }
 
-    private function getConfig()
+    private function getInputData()
     {
-        $config = [];
+        $tmp = [];
+        $data = [];
         if (file_exists(self::FILE_NAME)) {
 
             $f = fopen(self::FILE_NAME, "r");
@@ -192,10 +202,10 @@ class Migrate
             fclose($f);
         }
         foreach ($tmp as $key => $value) {
-            $config[] = $value;
+            $data[] = $value;
         }
 
-        return $config;
+        return $data;
     }
 
     /**
@@ -203,18 +213,18 @@ class Migrate
      */
     private function runAllMigrate()
     {
-        $config = $this->getConfig();
-        $pdo = new \PDO(sprintf('mysql:host=%s;dbname=%s', $config[0], $config[1]), $config[2], $config[3]);
+        $config = $this->getInputData();
         try {
-            $filelist = glob("*.sql");
-            foreach ($filelist as $file) {
+            $pdo = new \PDO(sprintf('mysql:host=%s;dbname=%s', $config[0], $config[1]), $config[2], $config[3]);
+            $fileList = glob("*.sql");
+            foreach ($fileList as $file) {
                 $query = file_get_contents($file);
                 if (!empty($query)) {
                     $pdo->exec($query);
                 }
             }
         } catch (\PDOException $e) {
-            return $e->getMessage();
+            return $this->t->add('Error: ' . $e->getMessage())->get();
         }
         return $this->t->add('Done')->get();
     }
@@ -225,15 +235,15 @@ class Migrate
      */
     private function runOneMigrate($fileName)
     {
-        $config = $this->getConfig();
-        $pdo = new \PDO(sprintf('mysql:host=%s;dbname=%s', $config[0], $config[1]), $config[2], $config[3]);
-        try {
+        $config = $this->getInputData();
+        try{
+            $pdo = new \PDO(sprintf('mysql:host=%s;dbname=%s', $config[0], $config[1]), $config[2], $config[3]);
             $query = file_get_contents($fileName);
             if (!empty($query)){
                 $pdo->exec($query);
             }
         } catch (\PDOException $e) {
-            return $this->t->add($e->getMessage())->get();
+            return $this->t->add('Error: ' . $e->getMessage())->get();
         }
 
         return $this->t->add('Done')->get();
