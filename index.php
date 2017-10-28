@@ -2,7 +2,8 @@
 
 require_once "vendor/autoload.php";
 
-define('URL','http://test.app/api/pois.php');
+define('APP_URL','http://test.app/api/pois.php');
+define('APP_RADIUS', 1);
 
 $app = new \Dykyi\Application();
-$app->run(URL);
+$app->run(APP_URL);

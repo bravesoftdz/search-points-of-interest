@@ -22,7 +22,8 @@ class GPSConvertor
      * @param Coordinates $coord2
      * @return int
      */
-    public static function getDistance(Coordinates $coord1, Coordinates $coord2 ) {
+    public static function getDistance(Coordinates $coord1, Coordinates $coord2 )
+    {
         $earth_radius = 6371;
 
         $dLat = deg2rad( $coord2->getLat() - $coord1->getLat() );
@@ -30,6 +31,7 @@ class GPSConvertor
 
         $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($coord1->getLat())) * cos(deg2rad($coord2->getLat())) * sin($dLon/2) * sin($dLon/2);
         $c = 2 * asin(sqrt($a));
+
         return $earth_radius * $c;
     }
 

@@ -47,6 +47,4 @@ class Coordinates
     {
         return $this->lat . ' , ' . $this->lon;
     }
-
-
 }

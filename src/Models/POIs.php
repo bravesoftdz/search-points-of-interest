@@ -3,8 +3,6 @@
 namespace Dykyi\Models;
 
 use PDO;
-use Dykyi\Component\Coordinates;
-use Dykyi\Helpers\GPSConvertor;
 
 /**
  * Class POIs

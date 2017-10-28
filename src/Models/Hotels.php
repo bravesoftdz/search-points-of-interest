@@ -15,7 +15,6 @@ use Dykyi\Component\Coordinates;
 class Hotels extends BaseModel
 {
     const ERROR_INPUT_HOTEL_NAME = 'Please enter the hotel name!';
-    const ERROR_NOT_POIS_FOUND   = 'Not found POIs';
 
     /**
      * @return string

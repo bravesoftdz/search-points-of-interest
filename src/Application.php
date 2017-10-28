@@ -11,8 +11,7 @@ use Dykyi\Models\Hotels;
  */
 class Application
 {
-
-    const RADIUS = 1;
+    const ERROR_NOT_POIS_FOUND = 'Not found POIs near Hotel: "%s" in radius: "%skm" ';
 
     /**
      * @param $hotelName
@@ -21,7 +20,7 @@ class Application
      */
     private function printInfo($hotelName, array $pois)
     {
-        $text = sprintf('The "%s" has %s POIs in a %dkm radius and POIs are:', $hotelName, count($pois), self::RADIUS). '<br>';
+        $text = sprintf('The "%s" has %s POIs in a %dkm radius and POIs are:', $hotelName, count($pois), APP_RADIUS). '<br>';
         foreach ($pois as $i => $one){
             $text .= sprintf('%d) %s (description: %s, address: %s, lat: %s, lon: %s)',
                     $i+1,
@@ -48,13 +47,14 @@ class Application
         $jsonPOIlist = Api::connect($url, json_encode([
             'data' => [
                 'hotel'     => $hotel,
-                'kilometer' => self::RADIUS,
+                'kilometer' => APP_RADIUS,
             ],
         ]));
+
         $poiList = json_decode($jsonPOIlist);
         if (count($poiList) <= 0)
         {
-            exit(Hotels::ERROR_NOT_POIS_FOUND);
+            exit(sprintf(self::ERROR_NOT_POIS_FOUND, $hotel, APP_RADIUS));
         }
 
         echo $this->printInfo($hotel, $poiList);
