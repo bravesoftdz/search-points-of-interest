@@ -6,5 +6,8 @@
         "psr-4": {
             "Dykyi\\": ["src/","api/"]
         }
+    },
+    "require": {
+        "vlucas/phpdotenv": "^2.4"
     }
 }

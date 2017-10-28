@@ -2,6 +2,7 @@
 
 namespace Dykyi;
 
+use Dotenv\Dotenv;
 use Dykyi\Component\Coordinates;
 use Dykyi\Models\Hotels;
 
@@ -20,20 +21,19 @@ class Application
      */
     private function printInfo($hotelName, array $pois)
     {
-        $text = sprintf('The "%s" has %s POIs in a %dkm radius and POIs are:', $hotelName, count($pois), APP_RADIUS). '<br>';
-        foreach ($pois as $i => $one){
+        $text = sprintf('The "%s" has %s POIs in a %dkm radius and POIs are:', $hotelName, count($pois), APP_RADIUS) . '<br>';
+        foreach ($pois as $i => $one) {
             $text .= sprintf('%d) %s (description: %s, address: %s, lat: %s, lon: %s)',
-                    $i+1,
+                    $i + 1,
                     $one->title,
                     '[empty]',
                     is_null($one->address) ? '' : $one->address,
                     is_null($one->lat) ?: $one->lat,
                     is_null($one->lon) ?: $one->lon
-                    ) .'<br>';
+                ) . '<br>';
         }
         return $text;
     }
-
 
     /**
      * Start function
@@ -42,6 +42,13 @@ class Application
      */
     public function run($url)
     {
+        if (!file_exists(HOME_FOLDER.'/.env')){
+            exit('File .env not found!');
+        }
+
+        $dotenv = new Dotenv(HOME_FOLDER);
+        $dotenv->load();
+
         /** @var Coordinates $coord */
         $hotel = (new Hotels())->getRandomHotelName();
         $jsonPOIlist = Api::connect($url, json_encode([

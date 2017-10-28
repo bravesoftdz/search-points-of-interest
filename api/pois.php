@@ -39,5 +39,9 @@ function getPOIFromHotelName($name, $kilometer = 1)
     return $result;
 }
 
+$dotenv = new \Dotenv\Dotenv('../');
+$dotenv->load();
+
+
 $post = json_decode($_POST['data']);
 echo json_encode(getPOIFromHotelName($post->data->hotel, $post->data->kilometer));
