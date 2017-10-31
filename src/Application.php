@@ -2,7 +2,6 @@
 
 namespace Dykyi;
 
-use Dotenv\Dotenv;
 use Dykyi\Component\Coordinates;
 use Dykyi\Models\Hotels;
 
@@ -45,9 +44,6 @@ class Application
         if (!file_exists(HOME_FOLDER.'/.env')){
             exit('File .env not found!');
         }
-
-        $dotenv = new Dotenv(HOME_FOLDER);
-        $dotenv->load();
 
         /** @var Coordinates $coord */
         $hotel = (new Hotels())->getRandomHotelName();
