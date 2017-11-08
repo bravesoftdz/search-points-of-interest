@@ -4,6 +4,7 @@ namespace Dykyi;
 
 use Dykyi\Component\Coordinates;
 use Dykyi\Models\Hotels;
+use GuzzleHttp\Client;
 use PHPUnit\Runner\Exception;
 
 /**
@@ -42,7 +43,7 @@ class Application extends BaseApplication
      */
     public function run($url)
     {
-        $jsonPOIlist = '';
+        $response = '';
         if (!file_exists(HOME_FOLDER.'/.env')){
             exit('File .env not found!');
         }
@@ -50,18 +51,15 @@ class Application extends BaseApplication
         /** @var Coordinates $coord */
         $hotel = (new Hotels())->getRandomHotelName();
         try {
-            $this->logger->info('Get POIs from hotel: '. $hotel);
-            $jsonPOIlist = Api::connect($url, json_encode([
-                'data' => [
-                    'hotel'     => $hotel,
-                    'kilometer' => APP_RADIUS,
-                ],
-            ]));
+            $this->logger->info('Get POIs from hotel: ' . $hotel);
+            $client = new Client();
+            $res = $client->post($url, ['form_params' => ['hotel' => $hotel, 'kilometer' => APP_RADIUS]]);
+            $response = $res->getBody();
         } catch (Exception $e){
             $this->logger->error($e->getMessage());
         }
 
-        $poiList = json_decode($jsonPOIlist);
+        $poiList = json_decode($response);
         if (count($poiList) <= 0)
         {
             $errorMessage = sprintf(self::ERROR_NOT_POIS_FOUND, $hotel, APP_RADIUS);
