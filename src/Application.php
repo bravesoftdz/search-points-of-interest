@@ -4,12 +4,13 @@ namespace Dykyi;
 
 use Dykyi\Component\Coordinates;
 use Dykyi\Models\Hotels;
+use PHPUnit\Runner\Exception;
 
 /**
  * Class Application
  * @package Dykyi
  */
-class Application
+class Application extends BaseApplication
 {
     const ERROR_NOT_POIS_FOUND = 'Not found POIs near Hotel: "%s" in radius: "%skm" ';
 
@@ -41,23 +42,31 @@ class Application
      */
     public function run($url)
     {
+        $jsonPOIlist = '';
         if (!file_exists(HOME_FOLDER.'/.env')){
             exit('File .env not found!');
         }
 
         /** @var Coordinates $coord */
         $hotel = (new Hotels())->getRandomHotelName();
-        $jsonPOIlist = Api::connect($url, json_encode([
-            'data' => [
-                'hotel'     => $hotel,
-                'kilometer' => APP_RADIUS,
-            ],
-        ]));
+        try {
+            $this->logger->info('Get POIs from hotel: '. $hotel);
+            $jsonPOIlist = Api::connect($url, json_encode([
+                'data' => [
+                    'hotel'     => $hotel,
+                    'kilometer' => APP_RADIUS,
+                ],
+            ]));
+        } catch (Exception $e){
+            $this->logger->error($e->getMessage());
+        }
 
         $poiList = json_decode($jsonPOIlist);
         if (count($poiList) <= 0)
         {
-            exit(sprintf(self::ERROR_NOT_POIS_FOUND, $hotel, APP_RADIUS));
+            $errorMessage = sprintf(self::ERROR_NOT_POIS_FOUND, $hotel, APP_RADIUS);
+            $this->logger->info($errorMessage);
+            exit($errorMessage);
         }
 
         echo $this->printInfo($hotel, $poiList);
