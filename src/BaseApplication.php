@@ -12,6 +12,9 @@ use Psr\Log\NullLogger;
  */
 class BaseApplication implements LoggerAwareInterface
 {
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * BaseApplication constructor.
      * @param LoggerInterface|null $logger

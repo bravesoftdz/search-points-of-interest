@@ -30,14 +30,20 @@ class Coordinates
         $this->lon = $lon;
     }
 
+    /**
+     * @return float
+     */
     public function getLon()
     {
-        return $this->lon;
+        return (float)$this->lon;
     }
 
+    /**
+     * @return float
+     */
     public function getLat()
     {
-        return $this->lat;
+        return (float)$this->lat;
     }
 
     /**

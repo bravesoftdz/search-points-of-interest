@@ -11,7 +11,7 @@ use Dykyi\PDOConnection;
 abstract class BaseModel
 {
     /** @var PDOConnection|null  */
-    static $db = null;
+    public static $db = null;
 
     public function __construct()
     {

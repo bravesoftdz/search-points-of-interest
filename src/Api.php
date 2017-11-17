@@ -13,7 +13,7 @@ class Api
      * @param $data
      * @return mixed
      */
-    static function connect($url, $data)
+    public static function connect($url, $data)
     {
         $ch = curl_init();
 
